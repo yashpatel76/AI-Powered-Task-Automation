@@ -1,0 +1,247 @@
+{
+  "name": "Stock Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        40
+      ],
+      "id": "36c31d1a-ee06-4b80-9f23-a308f7f00521",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "108afbc6-b6af-42d7-924d-cd5b9a083f47",
+              "name": "ticker",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        140,
+        220
+      ],
+      "id": "3b84c002-0363-419b-b110-bb4d82ac5d41",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You're a MACD technical analyst. Analyze the provided MACD chart image and interpret:\n\n1. **MACD & Signal Line:** Note crossover (bullish/bearish), direction, spacing, and time/location.\n2. **Histogram:** State if it's positive/negative, rising/falling, and momentum insight.\n3. **Zero Line Cross:** Has MACD crossed it? Bullish or bearish? Long-term momentum?\n4. **Divergences:** Look for peaks/troughs suggesting bullish/bearish divergence within MACD.\n5. **Conclusion:** Based on the above, what is the current MACD signal?",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        580,
+        60
+      ],
+      "id": "d122bb4d-8fbb-4eb0-908c-4e96fb926a97",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        240
+      ],
+      "id": "22bc280a-c6f1-4b28-8184-1e840fcda980",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ygs77Y2hv1TUz54H",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a8f8c9de-0eac-44fd-a66a-3a68ab00f1b2",
+              "name": "response",
+              "value": "={{ $json.text }}\n\n{{ $('Final_Chart').item.json.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        860,
+        220
+      ],
+      "id": "b2331bd2-85e1-4885-9a2b-1b761ff1dabc",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.chart-img.com/v2/tradingview/advanced-chart/storage",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "W0zLisGFmw4oThEYgtR6G57eAoZl7uoEWgBgHTFc"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"theme\": \"dark\",\n  \"interval\": \"1W\",\n  \"symbol\": \"NASDAQ:{{ $json.ticker }}\",\n  \"override\": {\n    \"showStudyLastValue\": false\n  },\n  \"studies\": [\n    {\n      \"name\": \"Volume\",\n      \"forceOverlay\": true\n    },\n    {\n      \"name\": \"MACD\",\n      \"override\": {\n        \"Signal.linewidth\": 2,\n        \"Signal.color\": \"rgb(255,65,129)\"\n      }\n    }\n  ]\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        300,
+        60
+      ],
+      "id": "20c27b99-ea26-4695-a432-ad35bdcbcd6a",
+      "name": "Chart_Image"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        220
+      ],
+      "id": "610e72c4-c80b-45ab-89c6-f7e52b74cf33",
+      "name": "Final_Chart"
+    }
+  ],
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "json": {
+          "query": "TSLA"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Chart_Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chart_Image": {
+      "main": [
+        [
+          {
+            "node": "Final_Chart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final_Chart": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2c39fff6-42a4-487d-acc0-8b64220fd1d2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8d6ac492b0d5bfeac662efcf1437e5596fbaf2f3ef578a8b5141078c4ee47955"
+  },
+  "id": "Q18F21qXD3xIDbTY",
+  "tags": []
+}
