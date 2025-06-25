@@ -1,5 +1,5 @@
 
-# AI-Powered Automation Workflows using n8n
+# AI-Powered Automation Workflows (n8n + OpenAI)
 
 This repository showcases two practical, AI-driven automation workflows built using the powerful no-code platform **n8n**. These projects demonstrate how to integrate APIs, leverage Large Language Models (LLMs), and orchestrate real-time decision-making through smart assistants.
 
