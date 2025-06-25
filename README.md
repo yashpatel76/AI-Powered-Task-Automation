@@ -84,6 +84,6 @@ In both workflows, **OpenAI’s Large Language Model** (LLM) is used to:
 ## 👨‍💻 Author
 **Yash Patel** 
 
-[LinkedIn/yashpatel76]
+LinkedIn/yashpatel76
 
-[GitHub/yashpatel76]
+GitHub/yashpatel76
