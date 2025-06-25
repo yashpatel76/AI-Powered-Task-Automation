@@ -103,8 +103,8 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer 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"
-            }
+              "value": "Bearer #####"
+            }  
           ]
         },
         "sendBody": true,
